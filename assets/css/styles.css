@@ -2,3 +2,14 @@ html,
 body {
   background-color: #00701a;
 }
+
+.card {
+  position: relative;
+  width: 100px;
+  left: 100px;
+  margin-left: -75px;
+}
+
+#player-cards {
+  min-height: 150px;
+}
