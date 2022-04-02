@@ -2,6 +2,7 @@ const types = ['C', 'D', 'H', 'S'];
 const specials = ['A', 'J', 'Q', 'K'];
 
 let deck = [];
+let playerPoints, oponentPoints;
 
 const shuffle = (array) => {
   let currentIndex = array.length,
@@ -32,5 +33,17 @@ const createDeck = () => {
   });
   return shuffle(own_deck);
 };
+
+const hit = () => {
+  if (!deck.length) {
+    throw 'Without cards';
+  }
+  return deck.pop();
+};
+
+const cardValue = (card) => {
+  const cardValue = card.substring(0, card.length - 1);
+  return isNaN(cardValue) ? (cardValue == 'A' ? 11 : 10) : Number(cardValue);
+};
+
 deck = createDeck();
-console.log(deck);
