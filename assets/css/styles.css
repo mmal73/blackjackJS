@@ -6,8 +6,8 @@ body {
 .card {
   position: relative;
   width: 100px;
-  left: 100px;
-  margin-left: -75px;
+  left: 80px;
+  margin-left: -60px;
 }
 
 #player-cards {

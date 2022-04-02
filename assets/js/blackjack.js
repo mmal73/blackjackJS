@@ -1,8 +1,15 @@
+/* Vars */
 const types = ['C', 'D', 'H', 'S'];
 const specials = ['A', 'J', 'Q', 'K'];
 
 let deck = [];
-let playerPoints, oponentPoints;
+let playerPoints = 0,
+  oponentPoints = 0;
+
+/* Html references */
+const btnHit = document.querySelector('#btnHit');
+const pointsContainer = document.querySelectorAll('small');
+const playerCardsContainer = document.querySelector('#player-cards');
 
 const shuffle = (array) => {
   let currentIndex = array.length,
@@ -47,3 +54,14 @@ const cardValue = (card) => {
 };
 
 deck = createDeck();
+
+btnHit.addEventListener('click', () => {
+  const currentCard = hit();
+  playerPoints += cardValue(currentCard);
+  pointsContainer[0].innerHTML = playerPoints;
+
+  const cardImg = document.createElement('img');
+  cardImg.src = `assets/cards/${currentCard}.png`;
+  cardImg.classList.add('card');
+  playerCardsContainer.append(cardImg);
+});
