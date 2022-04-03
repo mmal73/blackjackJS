@@ -1,122 +1,136 @@
-/* Vars */
-const types = ['C', 'D', 'H', 'S'];
-const specials = ['A', 'J', 'Q', 'K'];
+const game = (() => {
+  'use-strict';
 
-let deck = [];
-let playerPoints = 0,
-  oponentPoints = 0;
+  let numPlayers = 2;
+  const types = ['C', 'D', 'H', 'S'];
+  const specials = ['A', 'J', 'Q', 'K'];
 
-/* Html references */
-const btnNewGame = document.querySelector('#btnNewGame');
-const btnHit = document.querySelector('#btnHit');
-const btnStand = document.querySelector('#btnStand');
-const pointsContainer = document.querySelectorAll('small');
-const playerCardsContainer = document.querySelector('#player-cards');
-const oponentCardsContainer = document.querySelector('#oponent-cards');
+  let deck = [];
+  let playersPoints = [];
 
-const shuffle = (array) => {
-  let currentIndex = array.length,
-    randomIndex;
+  /* Html references */
+  const btnNewGame = document.querySelector('#btnNewGame'),
+    btnHit = document.querySelector('#btnHit'),
+    btnStand = document.querySelector('#btnStand');
 
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
+  const pointsContainer = document.querySelectorAll('small'),
+    cardsContainer = document.querySelectorAll('.cards-container');
 
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
-  }
+  const shuffle = (array) => {
+    let currentIndex = array.length,
+      randomIndex;
 
-  return array;
-};
+    while (currentIndex != 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
 
-const startGame = () => {
-  btnHit.disabled = false;
-  btnStand.disabled = false;
-  playerPoints = 0;
-  oponentPoints = 0;
-  pointsContainer[0].innerText = 0;
-  pointsContainer[1].innerText = 0;
-  playerCardsContainer.innerHTML = '';
-  oponentCardsContainer.innerHTML = '';
-  deck = createDeck();
-};
-
-const createDeck = () => {
-  let own_deck = [];
-  types.forEach((type) => {
-    for (let i = 2; i <= 10; i++) {
-      own_deck.push(i + type);
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
     }
-    for (const special of specials) {
-      own_deck.push(special + type);
+
+    return array;
+  };
+
+  const createDeck = () => {
+    let own_deck = [];
+    types.forEach((type) => {
+      for (let i = 2; i <= 10; i++) {
+        own_deck.push(i + type);
+      }
+      for (const special of specials) {
+        own_deck.push(special + type);
+      }
+    });
+    return shuffle(own_deck);
+  };
+
+  const hit = () => {
+    if (!deck.length) {
+      throw 'Without cards';
+    }
+    return deck.pop();
+  };
+
+  const cardValue = (card) => {
+    const cardValue = card.substring(0, card.length - 1);
+    return isNaN(cardValue) ? (cardValue == 'A' ? 11 : 10) : Number(cardValue);
+  };
+
+  const createCardImg = (currentCard, turno) => {
+    const img = document.createElement('img');
+    img.src = `assets/cards/${currentCard}.png`;
+    img.classList.add('card');
+    cardsContainer[turno].append(img);
+  };
+
+  const checkWinner = () => {
+    setTimeout(() => {
+      if (playersPoints[1] > playersPoints[0] && playersPoints[1] <= 21) {
+        alert('Oponent win');
+      } else {
+        alert('Player1 Gana');
+      }
+    }, 100);
+  };
+
+  const oponentHit = () => {
+    btnHit.disabled = true;
+    btnStand.disabled = true;
+    do {
+      const currentCard = hit();
+      createCardImg(currentCard, 1);
+      sumPoints(currentCard, 1);
+    } while (playersPoints[1] <= playersPoints[0] && playersPoints[0] <= 21);
+
+    checkWinner();
+  };
+
+  const startGame = () => {
+    deck = createDeck();
+    playersPoints = [];
+    for (let i = 0; i < numPlayers; i++) {
+      playersPoints.push(0);
+      pointsContainer[i].innerText = 0;
+      cardsContainer[i].innerHTML = '';
+    }
+    btnHit.disabled = false;
+    btnStand.disabled = false;
+  };
+
+  const sumPoints = (currentCard, turno) => {
+    playersPoints[turno] += cardValue(currentCard);
+    pointsContainer[turno].innerText = playersPoints[turno];
+  };
+
+  btnHit.addEventListener('click', () => {
+    const currentCard = hit();
+    sumPoints(currentCard, 0);
+    createCardImg(currentCard, 0);
+
+    if (playersPoints[0] === 21) {
+      alert('Player1 win');
+      startGame();
+    } else if (playersPoints[0] > 21) {
+      alert('Oponent win');
+      startGame();
     }
   });
-  return shuffle(own_deck);
-};
 
-const hit = () => {
-  if (!deck.length) {
-    throw 'Without cards';
-  }
-  return deck.pop();
-};
-
-const cardValue = (card) => {
-  const cardValue = card.substring(0, card.length - 1);
-  return isNaN(cardValue) ? (cardValue == 'A' ? 11 : 10) : Number(cardValue);
-};
-
-const cardImg = (currentCard) => {
-  const img = document.createElement('img');
-  img.src = `assets/cards/${currentCard}.png`;
-  img.classList.add('card');
-  return img;
-};
-
-const oponentHit = () => {
-  do {
-    const currentCard = hit();
-    const img = cardImg(currentCard);
-    oponentPoints += cardValue(currentCard);
-    pointsContainer[1].innerText = oponentPoints;
-    oponentCardsContainer.append(img);
-    if (playerPoints > 21) {
-      break;
-    }
-  } while (oponentPoints <= playerPoints && playerPoints <= 21);
-  if (
-    (oponentPoints > playerPoints && oponentPoints <= 21) ||
-    playerPoints > 21
-  ) {
-    alert('Oponent Win');
-  } else {
-    alert('Player Win');
-  }
-};
-
-btnHit.addEventListener('click', () => {
-  const currentCard = hit();
-  playerPoints += cardValue(currentCard);
-  pointsContainer[0].innerText = playerPoints;
-  const img = cardImg(currentCard);
-  playerCardsContainer.append(img);
-  if (playerPoints > 21) {
+  btnStand.addEventListener('click', () => {
     btnHit.disabled = true;
+    btnStand.disabled = true;
     oponentHit();
-  } else if (playerPoints == 21) {
-    alert('Player 1 Win');
-  }
-});
+  });
 
-btnStand.addEventListener('click', () => {
-  btnHit.disabled = true;
-  btnStand.disabled = true;
-  oponentHit();
-});
+  btnNewGame.addEventListener('click', () => {
+    startGame();
+  });
 
-btnNewGame.addEventListener('click', () => {
   startGame();
-});
-startGame();
+
+  return {
+    startGame,
+  };
+})();
